@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Action = System.Action;
+using Application = UnityEngine.Application;
 
 public class TrayMenuEntry
 {
@@ -55,43 +56,6 @@ public class TrayIndicator : MonoBehaviour
     
     [DllImport("libappindicator3")]
     private static extern void app_indicator_set_icon_full(IntPtr indicator, string icon_name, string icon_desc);
-
-    // GTK P/Invokes for basic menu (requires libgtk-3-0)
-    [DllImport("libgtk-3")]
-    private static extern IntPtr gtk_menu_new();
-    
-    [DllImport("libgtk-3")]
-    private static extern bool gtk_init_check(ref int argc, ref IntPtr argv);
-
-    [DllImport("libgtk-3")]
-    private static extern IntPtr gtk_menu_item_new_with_label(string label);
-
-    [DllImport("libgtk-3")]
-    private static extern IntPtr gtk_check_menu_item_new_with_label(string label);
-
-    [DllImport("libgtk-3")]
-    private static extern void gtk_check_menu_item_set_active(IntPtr check_item, bool is_active);
-
-    [DllImport("libgtk-3")]
-    private static extern bool gtk_check_menu_item_get_active(IntPtr check_item);
-
-    [DllImport("libgtk-3")]
-    private static extern IntPtr gtk_separator_menu_item_new();
-
-    [DllImport("libgtk-3")]
-    private static extern void gtk_menu_shell_append(IntPtr menu_shell, IntPtr child);
-
-    [DllImport("libgtk-3")]
-    private static extern void gtk_widget_show(IntPtr widget);
-
-    [DllImport("libgtk-3")]
-    private static extern void gtk_widget_destroy(IntPtr widget);
-
-    [DllImport("libglib-2.0.so.0")]
-    private static extern bool g_main_context_pending(IntPtr context);
-
-    [DllImport("libglib-2.0.so.0")]
-    private static extern void g_main_context_iteration(IntPtr context, bool may_block);
     
     [DllImport("libgobject-2.0")]
     private static extern ulong g_signal_connect_data(IntPtr instance, 
@@ -106,12 +70,15 @@ public class TrayIndicator : MonoBehaviour
     private delegate void GtkMenuItemActivateDelegate(IntPtr menuItem, IntPtr userData);
 
     private IntPtr indicatorHandle;
-    private IntPtr menuHandle;
+    private Gtk.Menu menu;
+    private Gtk.MenuShell menuShell;
     private List<GCHandle> delegateHandles = new();
     
     #endregion
 
     public static TrayIndicator Instance;
+
+    private bool initialized;
     
     Dictionary<IntPtr, Action> MenuActions = new();
 
@@ -120,28 +87,25 @@ public class TrayIndicator : MonoBehaviour
     private void OnEnable()
     {
         Instance = this;
+        string[] argc = { };
+        initialized = Gtk.Init.Check(ref argc);
     }
     
     private void Update()
     {
         if (indicatorHandle != IntPtr.Zero)
         {
-            while (g_main_context_pending(IntPtr.Zero))
+            while (GLib.MainContext.Pending())
             {
-                g_main_context_iteration(IntPtr.Zero, false);
+                GLib.MainContext.Iteration();
             }
         }
     }
 
     public void InitializeTrayIcon(string iconName)
     {
-        int argc = 0;
-        IntPtr argv = IntPtr.Zero;
-        if (!gtk_init_check(ref argc, ref argv))
-        {
-            Debug.LogError("Failed to initialize GTK");
+        if (!initialized)
             return;
-        }
         // Create the indicator with a unique ID, normal icon name (use a theme icon like "applications-system"), and category
         indicatorHandle = app_indicator_new(iconName, "applications-system", AppIndicatorCategory.ApplicationStatus);
 
@@ -177,54 +141,60 @@ public class TrayIndicator : MonoBehaviour
 
     private void CreateMenu(List<TrayMenuEntry> menuEntries)
     {
-        menuHandle = gtk_menu_new();
+        if (!initialized)
+            return;
+        menu = new Gtk.Menu();
+        menuShell = new Gtk.MenuShell(menu.Handle);
         if (menuEntries != null)
         {
             foreach (var entry in menuEntries)
             {
                 if (entry.Label == "Separator")
                 {
-                    IntPtr separator = gtk_separator_menu_item_new();
-                    gtk_menu_shell_append(menuHandle, separator);
-                    gtk_widget_show(separator);
+                    var separator = new Gtk.SeparatorMenuItem();
+                    menuShell.Append(separator);
+                    separator.Show();
                 }
                 else
                 {
-                    IntPtr menuItem;
+                    Gtk.MenuItem menuItem = null;
+                    Gtk.CheckMenuItem checkMenuItem = null;
                     bool isToggle = entry.IsToggle;
 
                     if (isToggle)
                     {
                         // Create toggle (check) menu item
-                        menuItem = gtk_check_menu_item_new_with_label(entry.Label);
-                        gtk_check_menu_item_set_active(menuItem, entry.InitialState);
+                        checkMenuItem = new Gtk.CheckMenuItem(entry.Label);
+                        checkMenuItem.Active = entry.InitialState;
+                        menuShell.Append(checkMenuItem);
+                        checkMenuItem.Show();
                     }
                     else
                     {
                         // Regular menu item
-                        menuItem = gtk_menu_item_new_with_label(entry.Label);
+                        menuItem = new Gtk.MenuItem(entry.Label);
+                        menuShell.Append(menuItem);
+                        menuItem.Show();
                     }
-
-                    gtk_menu_shell_append(menuHandle, menuItem);
-                    gtk_widget_show(menuItem);
                     
                     if (entry.Callback != null)
                     {
-                        MenuActions.Add(menuItem, entry.Callback);
+                        MenuActions.Add(isToggle ? checkMenuItem.Handle : menuItem.Handle, entry.Callback);
                     }
 
-                    GtkMenuItemActivateDelegate menuItemDelegate = OnMenuItemClicked;
-                    IntPtr callbackPtr = Marshal.GetFunctionPointerForDelegate(menuItemDelegate);
-                    g_signal_connect_data(menuItem, "activate", callbackPtr, IntPtr.Zero, IntPtr.Zero, 0);
-                    delegateHandles.Add(GCHandle.Alloc(menuItemDelegate));
+                    if (menuItem != null)
+                        menuItem.Activated += (_, _) => { OnMenuItemClicked(menuItem.Handle); };
+
+                    if (checkMenuItem != null)
+                        checkMenuItem.Activated += (_, _) => { OnMenuItemClicked(checkMenuItem.Handle); };
                 }
             }
         }
         
-        app_indicator_set_menu(indicatorHandle, menuHandle);
+        app_indicator_set_menu(indicatorHandle, menu.Handle);
     }
 
-    private void OnMenuItemClicked(IntPtr menuItem, IntPtr userData)
+    private void OnMenuItemClicked(IntPtr menuItem)
     {
         if (MenuActions.ContainsKey(menuItem))
         {
@@ -252,11 +222,6 @@ public class TrayIndicator : MonoBehaviour
 
     private void CleanupMenu()
     {
-        if (menuHandle != IntPtr.Zero)
-        {
-            gtk_widget_destroy(menuHandle);
-            menuHandle = IntPtr.Zero;
-        }
         MenuActions.Clear();
         foreach (var handle in delegateHandles)
         {

@@ -17,6 +17,9 @@ public class SettingsHandlerToggles : MonoBehaviour
     public Toggle ambientOcclusionToggle;
     public Toggle enableIKToggle;
     public Toggle enableDanceSwitchToggle;
+    public Toggle enableRandomMessagesToggle;
+    public Toggle enableHusbandoModeToggle;
+    public Toggle useXMoveWindowToggle;
 
     [Header("External Objects")]
     public GameObject bloomObject;
@@ -39,6 +42,9 @@ public class SettingsHandlerToggles : MonoBehaviour
         ambientOcclusionToggle?.onValueChanged.AddListener(OnAmbientOcclusionChanged);
         enableIKToggle?.onValueChanged.AddListener(OnEnableIKChanged);
         enableDanceSwitchToggle?.onValueChanged.AddListener(OnEnableDanceSwitchChanged);
+        enableRandomMessagesToggle?.onValueChanged.AddListener(OnEnableRandomMessagesChanged);
+        enableHusbandoModeToggle?.onValueChanged.AddListener(OnEnableHusbandoModeChanged);
+        useXMoveWindowToggle?.onValueChanged.AddListener(OnUseXMoveWindowToggleChanged);
 
         LoadSettings();
         ApplySettings();
@@ -58,6 +64,25 @@ public class SettingsHandlerToggles : MonoBehaviour
     private void OnAmbientOcclusionChanged(bool v) { SaveLoadHandler.Instance.data.ambientOcclusion = v; ApplySettings(); Save(); }
     private void OnEnableIKChanged(bool v) { SaveLoadHandler.Instance.data.enableIK = v; ApplySettings(); Save(); }
     private void OnEnableDanceSwitchChanged(bool v) { SaveLoadHandler.Instance.data.enableDanceSwitch = v; Save(); }
+    private void OnEnableRandomMessagesChanged(bool v)
+    {
+        SaveLoadHandler.Instance.data.enableRandomMessages = v;
+        ApplySettings();
+        Save();
+    }
+    private void OnEnableHusbandoModeChanged(bool v)
+    {
+        SaveLoadHandler.Instance.data.enableHusbandoMode = v;
+        ApplySettings();
+        Save();
+    }
+    
+    private void OnUseXMoveWindowToggleChanged(bool v)
+    {
+        SaveLoadHandler.Instance.data.useXMoveWindow = v;
+        ApplySettings();
+        Save();
+    }
 
     #endregion
 
@@ -76,12 +101,30 @@ public class SettingsHandlerToggles : MonoBehaviour
         ambientOcclusionToggle?.SetIsOnWithoutNotify(data.ambientOcclusion);
         enableIKToggle?.SetIsOnWithoutNotify(data.enableIK);
         enableDanceSwitchToggle?.SetIsOnWithoutNotify(data.enableDanceSwitch);
+        enableHusbandoModeToggle?.SetIsOnWithoutNotify(data.enableHusbandoMode);
+        useXMoveWindowToggle?.SetIsOnWithoutNotify(data.useXMoveWindow);
+        enableRandomMessagesToggle?.SetIsOnWithoutNotify(data.enableRandomMessages);
         ApplySettings();
     }
 
     public void ApplySettings()
     {
         var data = SaveLoadHandler.Instance.data;
+        
+        // Random Messages
+        foreach (var arm in Resources.FindObjectsOfTypeAll<AvatarRandomMessages>())
+        {
+            arm.enableRandomMessages = data.enableRandomMessages;
+            if (data.enableRandomMessages && arm.isActiveAndEnabled)
+            {
+                arm.StopAllCoroutines();
+                arm.StartCoroutine("RandomMessageLoop");
+            }
+            else
+            {
+                arm.StopAllCoroutines();
+            }
+        }
 
         // Visuals
         if (bloomObject) bloomObject.SetActive(data.bloom);
@@ -118,6 +161,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         ambientOcclusionToggle?.SetIsOnWithoutNotify(false);
         enableIKToggle?.SetIsOnWithoutNotify(true);
         enableDanceSwitchToggle?.SetIsOnWithoutNotify(false);
+        enableRandomMessagesToggle?.SetIsOnWithoutNotify(false);
+        enableHusbandoModeToggle?.SetIsOnWithoutNotify(false);
 
         var data = SaveLoadHandler.Instance.data;
         data.enableDancing = true;
@@ -132,6 +177,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         data.ambientOcclusion = false;
         data.enableIK = true;
         data.enableDanceSwitch = false;
+        data.enableRandomMessages = false;
+        data.enableHusbandoMode = false;
 
         SaveLoadHandler.Instance.SaveToDisk();
         ApplySettings();

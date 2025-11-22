@@ -13,7 +13,7 @@ Tested on Ubuntu 24.04 LTS.
 ![](https://raw.githubusercontent.com/Marksonthegamer/Mate-Engine-Linux-Port/refs/heads/main/Screenshot.png)
 
 ### Usage
-Open the project in Unity 6000.2.6f2 and build the player with executable name "MateEngineX.x86_64", or simply grab a prebuilt one in [Releases](https://github.com/Marksonthegamer/Mate-Engine-Linux-Port/releases/) page. Then, run the `launch.sh` script in the output directory (This script is necessary for window transparency. For KDE, you also need to **disable "Allow applications to block compositing"** in `systemsettings`).
+Simply grab a prebuilt one in [Releases](https://github.com/Marksonthegamer/Mate-Engine-Linux-Port/releases/) page. Then, run the `launch.sh` script in the output directory (This script is necessary for window transparency. For KDE, you also need to **disable "Allow applications to block compositing"** in `systemsettings`).
 
 ### Requirements
 - A common GNU/Linux distro
@@ -37,6 +37,10 @@ sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappin
 
 Note that if you use GNOME, you will need [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) to show tray icon.
 
+### How to build / compile
+- For security reasons, you need to compile StandaloneFileBrowser plugin manually (just use `make` command under `Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFileBrowser`, then copy `libStandaloneFileBrowser.so` to `Assets/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`)
+- Then open the project in Unity 6000.2.6f2 and build the player with executable name "MateEngineX.x86_64"
+
 ### Ported Features & Highlights
 - Model visuals, alarm, screensaver, Chibi mode (they always work, any external libraries are not required for them)
 - Transparent background with cutoff
@@ -47,6 +51,7 @@ Note that if you use GNOME, you will need [AppIndicator and KStatusNotifierItem 
 - Discord RPC
 - Custom VRM importing
 - Simplified Chinese localization
+- Event-based Messages (Experimental)
 - Lower RAM usage than Windows version (Release 2.2.5)
 
 ![](https://raw.githubusercontent.com/Marksonthegamer/Mate-Engine-Linux-Port/refs/heads/main/RAMComparition.png)
@@ -75,7 +80,7 @@ This project lacks further testing and updates. Feel free to make PRs to contrib
 ![](https://raw.githubusercontent.com/Marksonthegamer/Mate-Engine-Linux-Port/refs/heads/main/Screenshot.png)
 
 ### 用法
-使用 Unity 6000.2.6f2 打开此项目然后构建Player，可执行文件名为"MateEngineX.x86_64"，或者在[Releases](https://github.com/Marksonthegamer/Mate-Engine-Linux-Port/releases/)页面获取预构建版本。必须运行输出目录中的`launch.sh`，否则 MateEngne 将缺少透明窗口背景（对于 KDE Plasma 桌面环境，你还需要在 KDE 系统设置中禁用“允许应用程序阻止显示特效合成”）。
+在[Releases](https://github.com/Marksonthegamer/Mate-Engine-Linux-Port/releases/)页面获取预构建版本。必须运行输出目录中的`launch.sh`，否则 MateEngne 将缺少透明窗口背景（对于 KDE Plasma 桌面环境，你还需要在 KDE 系统设置中禁用“允许应用程序阻止显示特效合成”）。
 
 ### 系统要求
 - 一个常见的 GNU/Linux 发行版
@@ -99,6 +104,10 @@ sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappin
 
 如果你使用 GNOME 桌面环境，你还需要安装 [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) 以显示托盘图标。
 
+### 如何编译
+- 出于安全原因，你需要手动编译 `StandaloneFilebrowser` 插件（只需在`Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFilebBrowser`下使用`make`命令，然后将`libStandaloneFilebBrowser.so`复制到`Asset/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`）
+- 然后使用 Unity 6000.2.6f2 打开此项目然后构建Player，将可执行文件重命名为"MateEngineX.x86_64"。
+
 ### 移植的功能与亮点
 - 模型视觉效果、闹钟、屏保、Q版模式（它们不需要任何外部库，因此始终工作）
 - 带 Cutoff 的透明背景
@@ -109,6 +118,7 @@ sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappin
 - Discord RPC
 - 自定义 VRM 模型导入
 - 简体中文版汉化
+- 基于事件的提示信息（实验性）
 - 与 Windows 版相比，使用更少内存（Release 2.2.5）
 
 ![](https://raw.githubusercontent.com/Marksonthegamer/Mate-Engine-Linux-Port/refs/heads/main/RAMComparition.png)

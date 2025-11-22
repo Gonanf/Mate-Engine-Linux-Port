@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Gtk;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
@@ -16,8 +17,6 @@ namespace X11
     public class X11Manager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         public static X11Manager Instance;
-
-        private Canvas canvas;
 
         private Vector2 initialMousePos;
         private Vector2 initialWindowPos;
@@ -40,6 +39,11 @@ namespace X11
         
         #region Unity Events
 
+        private void OnEnable()
+        {
+            Instance = this;
+        }
+
         void Update()
         {
             if (isDragging)
@@ -51,10 +55,8 @@ namespace X11
             }
         }
 
-        private void OnEnable()
+        private void Awake()
         {
-            Instance = this;
-            canvas = GetComponent<Canvas>();
             Init();
             int pid = Process.GetCurrentProcess().Id;
             List<IntPtr> windows = FindWindowsByPid(pid);
@@ -152,6 +154,11 @@ namespace X11
 
         public void SetWindowPosition(Vector2 position)
         {
+            if (SaveLoadHandler.Instance.data.useXMoveWindow)
+            {
+                SetWindowPositionLegacy(position);
+                return;
+            }
             if (_display != IntPtr.Zero && _unityWindow != IntPtr.Zero)
             {
                 IntPtr atom = XInternAtom(_display, "_NET_MOVERESIZE_WINDOW", true);
@@ -184,7 +191,6 @@ namespace X11
             if (_display != IntPtr.Zero && _unityWindow != IntPtr.Zero)
             {
                 XMoveWindow(_display, _unityWindow, (int)position.x, (int)position.y);
-                XMapWindow(_display, _unityWindow);
                 XFlush(_display);
             }
         }
@@ -357,6 +363,9 @@ namespace X11
 
         public void SetTopmost(bool topmost = true)
         {
+#if UNITY_EDITOR
+            return;
+#endif
             IntPtr wmStateAbove = XInternAtom(_display, "_NET_WM_STATE_ABOVE", true);
             if (wmStateAbove == IntPtr.Zero)
             {
@@ -551,6 +560,18 @@ namespace X11
             return coveredArea < targetArea - 1e-4f;
         }
 
+        private bool IsCompositionSupported()
+        {
+            for (int screen = 0; screen < XScreenCount(_display); screen++)
+            {
+                IntPtr selectionAtom = XInternAtom(_display, "_NET_WM_CM_S" + screen, false);
+                if (selectionAtom == IntPtr.Zero)
+                    continue;
+                return XGetSelectionOwner(_display, selectionAtom) != 0;
+            }
+            return false;
+        }
+
         private List<IntPtr> GetWindowPropertyAtoms(IntPtr window, IntPtr property)
         {
             var atoms = new List<IntPtr>();
@@ -616,6 +637,45 @@ namespace X11
             if (attrs.depth != 32 || !IsArgbVisual(_display, attrs.visual))
             {
                 ShowError("Unity window does not have a 32-bit ARGB visual. Skipping shaping.");
+#if !UNITY_EDITOR
+                Gdk.Window unityWindow = GdkX11Helper.ForeignNewForDisplay(_unityWindow);
+                var dummyParent = new Window("");
+                dummyParent.Realize();
+                dummyParent.SkipTaskbarHint = true;
+                dummyParent.SkipPagerHint = true;
+                dummyParent.Decorated = false;
+                dummyParent.Window.Reparent(unityWindow, 0, 0);
+                var dialog = new MessageDialog(dummyParent, DialogFlags.DestroyWithParent, MessageType.Warning, ButtonsType.Ok, false, "It looks like MateEngine is not running under an ARGB visual.");
+                dialog.SecondaryText = "MateEngine must rely on a true transparent canvas (aka ARGB visual) to show a transparent background. Without it, your avatar will show on a big black background.\n\nTo acquire a ARGB visual, try launching MateEngine using the launch script (usually called launch.sh) provided in MateEngine executable path.";
+                dialog.MessageType = MessageType.Warning;
+                dialog.Run();
+                dialog.Hide();
+#endif
+                return;
+            }
+
+            if (!IsCompositionSupported())
+            {
+                ShowError("No compositor found.");
+#if !UNITY_EDITOR
+                Gdk.Window unityWindow = GdkX11Helper.ForeignNewForDisplay(_unityWindow);
+                var dummyParent = new Window("");
+                dummyParent.Realize();
+                dummyParent.SkipTaskbarHint = true;
+                dummyParent.SkipPagerHint = true;
+                dummyParent.Decorated = false;
+                dummyParent.Window.Reparent(unityWindow, 0, 0);
+                var dialog = new MessageDialog(dummyParent, DialogFlags.DestroyWithParent, MessageType.Warning, ButtonsType.Ok, false, "Composition is unavailable for this window manager.");
+                dialog.SecondaryText = "A compositor is required for MateEngine to show a transparent background.\n\nIf you are running MateEngine on WMs that don't compose (like Openbox), try installing a compositing manager (such as picom) and configure it correctly, or simply switch to Mutter (GNOME), Xfwm4 (Xfce4) and other WMs which natively supports composition.\n\nIf you are running KWin (KDE), please make sure \"Allow applications to block compositing\" is turned off in KDE System Settings (It's in the compositor section of Display and Monitor).";
+                dialog.MessageType = MessageType.Warning;
+                var image = new Gtk.Image(new Gdk.Pixbuf(Resources.Load<Texture2D>("KWinHint").EncodeToPNG()));
+                image.Halign = Align.Center;
+                image.Show();
+                dialog.ContentArea?.PackStart(image, false, false, 0);
+                dialog.Show();
+                dialog.Run();
+                dialog.Hide();
+#endif
                 return;
             }
 
@@ -676,6 +736,7 @@ namespace X11
             XFillRectangle(display, mask, gc, 0, 0, (uint)image.width, (uint)image.height);
 
             XSetForeground(display, gc, 1);
+            
             for (int y = 0; y < image.height; y++)
             {
                 for (int x = 0; x < image.width; x++)
@@ -1171,6 +1232,12 @@ namespace X11
 
         [DllImport(LibX11)]
         private static extern int XFlush(IntPtr display);
+        
+        [DllImport(LibX11)]
+        private static extern int XScreenCount(IntPtr display);
+
+        [DllImport(LibX11)]
+        private static extern int XGetSelectionOwner(IntPtr display, IntPtr atom);
 
         [DllImport(LibX11)]
         private static extern int XSendEvent(IntPtr display, IntPtr window, bool propagate,

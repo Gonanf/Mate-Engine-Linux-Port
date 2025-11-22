@@ -36,10 +36,10 @@ public class SaveLoadHandler : MonoBehaviour
         var args = Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i].Equals("--savefile", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            if (args[i].Equals("--savefile", StringComparison.Ordinal) && i + 1 < args.Length)
                 fileName = args[i + 1].Trim('"');
 
-            if (args[i].Equals("--datadir", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            if (args[i].Equals("--datadir", StringComparison.Ordinal) && i + 1 < args.Length)
                 customDataDir = args[i + 1].Trim('"');
         }
 
@@ -86,7 +86,7 @@ public class SaveLoadHandler : MonoBehaviour
             try
             {
                 string json = File.ReadAllText(FilePath);
-                data = JsonConvert.DeserializeObject<SettingsData>(json);
+                data = JsonConvert.DeserializeObject<SettingsData>(json) ?? new SettingsData();
                 Debug.Log("[SaveLoadHandler] Loaded settings from: " + FilePath);
             }
             catch (Exception e)
@@ -165,12 +165,13 @@ public class SaveLoadHandler : MonoBehaviour
         public int graphicsQualityLevel = 1;
         public Dictionary<string, bool> accessoryStates = new();
 
-        public bool startWithX11;
+        public bool startWithX11 = false;
         public bool enableRandomMessages = false;
 
         public string selectedModelPath = "";
         public int contextLength = 4096;
         public bool enableHusbandoMode = false;
+        public bool useXMoveWindow = false;
     }
 
     public static void SyncAllowedAppsToAllAvatars()

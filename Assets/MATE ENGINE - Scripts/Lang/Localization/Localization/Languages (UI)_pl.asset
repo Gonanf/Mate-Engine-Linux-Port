@@ -553,6 +553,14 @@ MonoBehaviour:
     m_Localized: "Usu\u0144 histori\u0119 czatu"
     m_Metadata:
       m_Items: []
+  - m_Id: 82517517364486144
+    m_Localized: Are you sure?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82530239246360576
+    m_Localized: Use XMoveWindow
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
