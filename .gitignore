@@ -16,7 +16,7 @@ Assets/StreamingAssets/Qwen3-4B-Q4_K_M.gguf
 Assets/StreamingAssets/undreamai-v1.2.5-llamacpp
 
 # Test Models
-Assets/MATE ENGINE - Test Station
+Assets/MATE ENGINE\ -\ Test\ Station
 Assets/ExportedModel
 
 # Unity auto-generated files
@@ -78,4 +78,4 @@ UserSettings/Layouts
 uWindowCapture.log
 
 # External native libraries - build them by yourself
-Assets/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64/
+#Assets/MATE\ ENGINE\ -\ Packages/StandaloneFileBrowser/Plugins/Linux/x86_64/
