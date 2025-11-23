@@ -20,11 +20,11 @@ Simply grab a prebuilt one in [Releases](https://github.com/Marksonthegamer/Mate
 - A common X11 desktop environment which supports compositing (such as KDE, Xfce, GNOME, etc.)
 - `libpulse` and `pipewire-pulse` (if you are using Pipewire as audio server)
 - `libgtk-3-dev libglib2.0-dev libappindicator3-dev`
-- `libx11-6 libxext6 libxrender1 libxdamage2`
+- `libx11-6 libxext6 libxrender1 libxdamage1`
 
 On Ubuntu and other Debian-based Linux:
 ```bash
-sudo apt install libpulse-dev libgtk-3-dev libglib2.0-dev libappindicator3-dev libx11-6 libxext6 libxrender1 libxdamage2
+sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libappindicator3-dev libx11-6 libxext6 libxrender1 libxdamage1
 ```
 On Fedora:
 ```bash
@@ -38,7 +38,7 @@ sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappin
 Note that if you use GNOME, you will need [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) to show tray icon.
 
 ### How to build / compile
-- For security reasons, you need to compile StandaloneFileBrowser plugin manually (just use `make` command under `Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFileBrowser`, then copy `libStandaloneFileBrowser.so` to `Assets/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`)
+- For security reasons, you need to compile StandaloneFileBrowser plugin manually (just use `make` command under `Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFileBrowser`, then copy `libStandaloneFileBrowser.so` to `Mate-Engine-Linux-Port/Assets/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`)
 - Then open the project in Unity 6000.2.6f2 and build the player with executable name "MateEngineX.x86_64"
 
 ### Ported Features & Highlights
@@ -87,11 +87,11 @@ This project lacks further testing and updates. Feel free to make PRs to contrib
 - 一个常见的 X11 桌面环境，支持显示特效合成（compositing） ，比如KDE，Xfce，GNOME等
 - `libpulse-dev` 和 `pipewire-pulse` (如果你在用 Pipewire 作为音频服务器)
 - `libgtk-3-dev libglib2.0-dev libappindicator3-dev`
-- `libx11-dev libxext-dev libxrender-dev libxdamage-dev`
+- `libx11-6 libxext6 libxrender1 libxdamage1`
 
 以下命令适用于 Ubuntu 和别的基于 Debian 的 Linux:
 ```bash
-sudo apt install libpulse-dev libgtk-3-dev libglib2.0-dev libappindicator3-dev libx11-dev libxext-dev libxrender-dev libxdamage-dev
+sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libappindicator3-dev libx11-6 libxext6 libxrender1 libxdamage1
 ```
 以下命令适用于 Fedora:
 ```bash
@@ -105,7 +105,7 @@ sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappin
 如果你使用 GNOME 桌面环境，你还需要安装 [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) 以显示托盘图标。
 
 ### 如何编译
-- 出于安全原因，你需要手动编译 `StandaloneFilebrowser` 插件（只需在`Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFilebBrowser`下使用`make`命令，然后将`libStandaloneFilebBrowser.so`复制到`Asset/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`）
+- 出于安全原因，你需要手动编译 `StandaloneFilebrowser` 插件（只需在`Mate-Engine-Linux-Port/Plugins/Linux/StandaloneFileBrowser`下使用`make`命令，然后将`libStandaloneFileBrowser.so`复制到`Mate-Engine-Linux-Port/Asset/MATE ENGINE - Packages/StandaloneFileBrowser/Plugins/Linux/x86_64`）
 - 然后使用 Unity 6000.2.6f2 打开此项目然后构建Player，将可执行文件重命名为"MateEngineX.x86_64"。
 
 ### 移植的功能与亮点

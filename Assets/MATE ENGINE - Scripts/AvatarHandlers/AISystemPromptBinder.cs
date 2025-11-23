@@ -17,7 +17,7 @@ public class AISystemPromptBinder : MonoBehaviour
     void Reset()
     {
         if (!input) input = GetComponent<InputField>();
-        if (!target) target = FindObjectOfType<LLMCharacter>();
+        if (!target) target = FindFirstObjectByType<LLMCharacter>();
     }
 
     void Awake()
@@ -72,7 +72,7 @@ public class AISystemPromptBinder : MonoBehaviour
         string path = GetFixedPromptPath();
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            Directory.CreateDirectory(Path.GetDirectoryName(path) ?? string.Empty);
             File.WriteAllText(path, s);
         }
         catch (Exception e) { Debug.LogError("[AI Prompt] Write failed: " + e); }

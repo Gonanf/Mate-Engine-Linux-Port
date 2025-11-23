@@ -41,8 +41,6 @@ public class AvatarAnimatorController : MonoBehaviour
     private static readonly int isMaleParam = Animator.StringToHash("isMale");
     private static readonly int isFemaleParam = Animator.StringToHash("isFemale");
 
-    public bool eventMessages;
-
 
     void OnEnable()
     {

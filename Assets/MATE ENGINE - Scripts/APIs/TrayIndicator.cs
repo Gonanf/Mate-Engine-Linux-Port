@@ -87,8 +87,6 @@ public class TrayIndicator : MonoBehaviour
     private void OnEnable()
     {
         Instance = this;
-        string[] argc = { };
-        initialized = Gtk.Init.Check(ref argc);
     }
     
     private void Update()

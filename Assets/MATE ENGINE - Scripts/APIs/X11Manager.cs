@@ -113,10 +113,10 @@ namespace X11
             yield return new WaitForSecondsRealtime(500);
             if (_display != IntPtr.Zero)
             {
-#if UNITY_EDITOR_LINUX
+#if UNITY_EDITOR
                 SetTopmost(false);
 #endif
-#if !UNITY_EDITOR_LINUX
+#if !UNITY_EDITOR
             if (damage != IntPtr.Zero)
             {
                 XDamageDestroy(_display, damage);
@@ -637,27 +637,13 @@ namespace X11
             if (attrs.depth != 32 || !IsArgbVisual(_display, attrs.visual))
             {
                 ShowError("Unity window does not have a 32-bit ARGB visual. Skipping shaping.");
-#if !UNITY_EDITOR
-                Gdk.Window unityWindow = GdkX11Helper.ForeignNewForDisplay(_unityWindow);
-                var dummyParent = new Window("");
-                dummyParent.Realize();
-                dummyParent.SkipTaskbarHint = true;
-                dummyParent.SkipPagerHint = true;
-                dummyParent.Decorated = false;
-                dummyParent.Window.Reparent(unityWindow, 0, 0);
-                var dialog = new MessageDialog(dummyParent, DialogFlags.DestroyWithParent, MessageType.Warning, ButtonsType.Ok, false, "It looks like MateEngine is not running under an ARGB visual.");
-                dialog.SecondaryText = "MateEngine must rely on a true transparent canvas (aka ARGB visual) to show a transparent background. Without it, your avatar will show on a big black background.\n\nTo acquire a ARGB visual, try launching MateEngine using the launch script (usually called launch.sh) provided in MateEngine executable path.";
-                dialog.MessageType = MessageType.Warning;
-                dialog.Run();
-                dialog.Hide();
-#endif
                 return;
             }
 
             if (!IsCompositionSupported())
             {
                 ShowError("No compositor found.");
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
                 Gdk.Window unityWindow = GdkX11Helper.ForeignNewForDisplay(_unityWindow);
                 var dummyParent = new Window("");
                 dummyParent.Realize();
@@ -672,9 +658,7 @@ namespace X11
                 image.Halign = Align.Center;
                 image.Show();
                 dialog.ContentArea?.PackStart(image, false, false, 0);
-                dialog.Show();
                 dialog.Run();
-                dialog.Hide();
 #endif
                 return;
             }
@@ -917,9 +901,9 @@ namespace X11
         private const int ZPixmap = 2;
         private const ulong AllPlanes = 0xFFFFFFFFFFFFFFFFUL; // For 64-bit
 
-        private const string LibX11 = "libX11.so.6";
+        public const string LibX11 = "libX11.so.6";
         private const string LibXExt = "libXext.so.6";
-        private const string LibXRender = "libXrender.so.1";
+        public const string LibXRender = "libXrender.so.1";
         private const string LibXDamage = "libXdamage.so.1";
 
         // X11 Event structures
@@ -939,7 +923,7 @@ namespace X11
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct XWindowAttributes
+        public struct XWindowAttributes
         {
             public int x, y;
             public int width, height;
@@ -1067,7 +1051,7 @@ namespace X11
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct XRenderPictFormat
+        public struct XRenderPictFormat
         {
             public IntPtr id;
             public int type;
@@ -1077,7 +1061,7 @@ namespace X11
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct XRenderDirectFormat
+        public struct XRenderDirectFormat
         {
             public short red;
             public short redMask;
