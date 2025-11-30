@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using SFB;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Collections;
+using Gtk;
+using X11;
+using Application = UnityEngine.Application;
+using Button = UnityEngine.UI.Button;
 
 public class MEModHandler : MonoBehaviour
 {
@@ -36,14 +39,36 @@ public class MEModHandler : MonoBehaviour
 
     void OpenFileDialogAndLoadMod()
     {
-        var ext = new[] { new ExtensionFilter("Mod Files", "me") };
-        var paths = StandaloneFileBrowser.OpenFilePanel("Select Mod", ".", ext, false);
-        if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
+        X11Manager.Instance.SetTopmost(false);
+        Gdk.Window gdkWindow = GdkX11Helper.ForeignNewForDisplay(X11Manager.Instance.UnityWindow);
+        var dummyParent = new Window("");
+        dummyParent.Realize();
+        dummyParent.SkipTaskbarHint = true;
+        dummyParent.SkipPagerHint = true;
+        dummyParent.Decorated = false;
+        dummyParent.Window.Reparent(gdkWindow, 0, 0);
+        var dialog = new FileChooserDialog("Select Mod", dummyParent, FileChooserAction.Open, "Cancel", ResponseType.Cancel, "Open", ResponseType.Accept);
+        var filter = new FileFilter();
+        filter.Name = "Mod Files";
+        filter.AddPattern("*.me");
+        dialog.AddFilter(filter);
+        dialog.SetCurrentFolder(".");
+        dialog.ShowAll();
+        dialog.Response += (_, response) =>
         {
-            var dest = Path.Combine(modFolderPath, Path.GetFileName(paths[0]));
-            File.Copy(paths[0], dest, true);
-            LoadMod(dest);
-        }
+            if (response.ResponseId == ResponseType.Accept)
+            {
+                string path = dialog.Filename;  // Selected file path
+                if (path.Length > 0 && !string.IsNullOrEmpty(path))
+                {
+                    var dest = Path.Combine(modFolderPath, Path.GetFileName(path));
+                    File.Copy(path, dest, true);
+                    LoadMod(dest);
+                }
+            }
+            dialog.Hide();
+        };
+        X11Manager.Instance.SetTopmost(SaveLoadHandler.Instance.data.isTopmost);
     }
 
     void LoadMod(string path)

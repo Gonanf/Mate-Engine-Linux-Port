@@ -4,11 +4,14 @@ using TMPro;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.IO;
-using SFB;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using Gtk;
 using UnityEngine.Localization;
+using X11;
+using Application = UnityEngine.Application;
+using Button = UnityEngine.UI.Button;
 
 public class UploadButtonHoldHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
@@ -29,7 +32,7 @@ public class UploadButtonHoldHandler : MonoBehaviour, IPointerDownHandler, IPoin
     [SerializeField] private string fallbackPngMissing = "PNG Missing";
 
     private Coroutine holdRoutine;
-    private bool isHolding = false;
+    private bool isHolding;
 
     private LocalizedString currentLocString;
 
@@ -66,49 +69,71 @@ public class UploadButtonHoldHandler : MonoBehaviour, IPointerDownHandler, IPoin
     {
         if (IsThumbnailMissing() || IsThumbnailTooBig())
         {
-            string[] paths = StandaloneFileBrowser.OpenFilePanel("Select PNG Thumbnail (Max 700KB)", "", new[] {
-                new ExtensionFilter("Image", "png")
-            }, false);
-
-            if (paths.Length == 0 || !File.Exists(paths[0])) return;
-
-            FileInfo fi = new FileInfo(paths[0]);
-            if (fi.Length > 700 * 1024)
+            X11Manager.Instance.SetTopmost(false);
+            Gdk.Window gdkWindow = GdkX11Helper.ForeignNewForDisplay(X11Manager.Instance.UnityWindow);
+            var dummyParent = new Window("");
+            dummyParent.Realize();
+            dummyParent.SkipTaskbarHint = true;
+            dummyParent.SkipPagerHint = true;
+            dummyParent.Decorated = false;
+            dummyParent.Window.Reparent(gdkWindow, 0, 0);
+            var dialog = new FileChooserDialog("Select PNG Thumbnail (Max 700KB)", dummyParent, FileChooserAction.Open, "Cancel", ResponseType.Cancel, "Open", ResponseType.Accept);
+            var filter = new FileFilter();
+            filter.Name = "Image";
+            filter.AddPattern("*.png");
+            dialog.AddFilter(filter);
+            dialog.ShowAll();
+            dialog.Response += (_, response) =>
             {
-                if (errorText != null)
+                dialog.Hide();
+                if (response.ResponseId != ResponseType.Accept)
                 {
-                    SetErrorByKey("PNG_TOO_BIG", "PNG too big");
+                    return;
                 }
-                return;
-            }
-
-            string thumbnailsFolder = Path.Combine(Application.persistentDataPath, "Thumbnails");
-            if (!Directory.Exists(thumbnailsFolder))
-                Directory.CreateDirectory(thumbnailsFolder);
-
-            string safeName = Path.GetFileNameWithoutExtension(entry.filePath) + "_thumb.png";
-            string destinationPath = Path.Combine(thumbnailsFolder, safeName);
-            File.Copy(paths[0], destinationPath, true);
-            entry.thumbnailPath = destinationPath;
-
-            string avatarsJsonPath = Path.Combine(Application.persistentDataPath, "avatars.json");
-            if (File.Exists(avatarsJsonPath))
-            {
-                var json = File.ReadAllText(avatarsJsonPath);
-                var list = JsonConvert.DeserializeObject<List<AvatarLibraryMenu.AvatarEntry>>(json);
-                var match = list.FirstOrDefault(e => e.filePath == entry.filePath);
-                if (match != null)
+                string path = dialog.Filename;  // Selected file path
+                if (path.Length == 0 || !File.Exists(path))
                 {
-                    match.thumbnailPath = destinationPath;
-                    File.WriteAllText(avatarsJsonPath, JsonConvert.SerializeObject(list, Formatting.Indented));
+                    return;
                 }
-            }
+                FileInfo fi = new FileInfo(path);
+                if (fi.Length > 700 * 1024)
+                {
+                    if (errorText != null)
+                    {
+                        SetErrorByKey("PNG_TOO_BIG", "PNG too big");
+                    }
+                    return;
+                }
 
-            var menu = GameObject.FindFirstObjectByType<AvatarLibraryMenu>();
-            if (menu != null) menu.ReloadAvatars();
+                string thumbnailsFolder = Path.Combine(Application.persistentDataPath, "Thumbnails");
+                if (!Directory.Exists(thumbnailsFolder))
+                    Directory.CreateDirectory(thumbnailsFolder);
 
-            if (errorText != null) errorText.text = "";
-            UpdateButtonLabel();
+                string safeName = Path.GetFileNameWithoutExtension(entry.filePath) + "_thumb.png";
+                string destinationPath = Path.Combine(thumbnailsFolder, safeName);
+                File.Copy(path, destinationPath, true);
+                entry.thumbnailPath = destinationPath;
+
+                string avatarsJsonPath = Path.Combine(Application.persistentDataPath, "avatars.json");
+                if (File.Exists(avatarsJsonPath))
+                {
+                    var json = File.ReadAllText(avatarsJsonPath);
+                    var list = JsonConvert.DeserializeObject<List<AvatarLibraryMenu.AvatarEntry>>(json);
+                    var match = list.FirstOrDefault(e => e.filePath == entry.filePath);
+                    if (match != null)
+                    {
+                        match.thumbnailPath = destinationPath;
+                        File.WriteAllText(avatarsJsonPath, JsonConvert.SerializeObject(list, Formatting.Indented));
+                    }
+                }
+
+                var menu = FindFirstObjectByType<AvatarLibraryMenu>();
+                if (menu != null) menu.ReloadAvatars();
+
+                if (errorText != null) errorText.text = "";
+                UpdateButtonLabel();
+            };
+            
             return;
         }
 
