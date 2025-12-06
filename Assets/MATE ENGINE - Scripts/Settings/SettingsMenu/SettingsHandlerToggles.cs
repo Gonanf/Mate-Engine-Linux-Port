@@ -160,6 +160,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         enableDanceSwitchToggle?.SetIsOnWithoutNotify(false);
         enableRandomMessagesToggle?.SetIsOnWithoutNotify(false);
         enableHusbandoModeToggle?.SetIsOnWithoutNotify(false);
+        useXMoveWindowToggle?.SetIsOnWithoutNotify(false);
+        verboseDiscordRpcLogToggle?.SetIsOnWithoutNotify(false);
 
         var data = SaveLoadHandler.Instance.data;
         data.enableDancing = true;
@@ -176,6 +178,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         data.enableDanceSwitch = false;
         data.enableRandomMessages = false;
         data.enableHusbandoMode = false;
+        data.useXMoveWindow = false;
+        data.verboseDiscordRPCLog = false;
 
         SaveLoadHandler.Instance.SaveToDisk();
         ApplySettings();
