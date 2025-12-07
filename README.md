@@ -88,18 +88,19 @@ This project lacks further testing and updates. Feel free to make PRs to contrib
 - `libpulse-dev` 和 `pipewire-pulse` (如果你在用 Pipewire 作为音频服务器)
 - `libgtk-3-dev libglib2.0-dev libappindicator3-dev`
 - `libx11-6 libxext6 libxrender1 libxdamage1`
+- `libayatana-appindicator`
 
 以下命令适用于 Ubuntu 和别的基于 Debian 的 Linux:
 ```bash
-sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libappindicator3-dev libx11-6 libxext6 libxrender1 libxdamage1
+sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libayatana-appindicator3-1 libx11-6 libxext6 libxrender1 libxdamage1
 ```
 以下命令适用于 Fedora:
 ```bash
-sudo dnf install pulseaudio-libs-devel gtk3-devel glib2-devel libX11-devel libXext-devel libXrender-devel libXdamage-devel libappindicator-gtk3
+sudo dnf install pulseaudio-libs-devel gtk3-devel glib2-devel libX11-devel libXext-devel libXrender-devel libXdamage-devel libayatana-appindicator
 ```
 以下命令适用于 Arch Linux:
 ```bash
-sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappindicator-gtk3
+sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage ayatana-appindicator
 ```
 
 如果你使用 GNOME 桌面环境，你还需要安装 [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) 以显示托盘图标。
