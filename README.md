@@ -19,20 +19,20 @@ Simply grab a prebuilt one in [Releases](https://github.com/Marksonthegamer/Mate
 - A common GNU/Linux distro
 - A common X11 desktop environment which supports compositing (such as KDE, Xfce, GNOME, etc.)
 - `libpulse` and `pipewire-pulse` (if you are using Pipewire as audio server)
-- `libgtk-3-dev libglib2.0-dev libappindicator3-dev`
+- `libgtk-3-dev libglib2.0-dev libayatana-appindicator`
 - `libx11-6 libxext6 libxrender1 libxdamage1`
 
 On Ubuntu and other Debian-based Linux:
 ```bash
-sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libappindicator3-dev libx11-6 libxext6 libxrender1 libxdamage1
+sudo apt install libpulse-dev libgtk-3-0t64 libglib2.0-0t64 libayatana-appindicator3-1 libx11-6 libxext6 libxrender1 libxdamage1
 ```
 On Fedora:
 ```bash
-sudo dnf install pulseaudio-libs gtk3 glib2 libX11 libXext libXrender-devel libXdamage libappindicator-gtk3
+sudo dnf install pulseaudio-libs gtk3 glib2 libX11 libXext libXrender-devel libXdamage libayatana-appindicator-gtk3
 ```
 On Arch Linux:
 ```bash
-sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libappindicator-gtk3
+sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libayatana-appindicator
 ```
 
 Note that if you use GNOME, you will need [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) to show tray icon.
@@ -100,7 +100,7 @@ sudo dnf install pulseaudio-libs-devel gtk3-devel glib2-devel libX11-devel libXe
 ```
 以下命令适用于 Arch Linux:
 ```bash
-sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage ayatana-appindicator
+sudo pacman -S libpulse gtk3 glib2 libx11 libxext libxrender libxdamage libayatana-appindicator
 ```
 
 如果你使用 GNOME 桌面环境，你还需要安装 [AppIndicator and KStatusNotifierItem Support extension](https://extensions.gnome.org/extension/615/appindicator-support/) 以显示托盘图标。
