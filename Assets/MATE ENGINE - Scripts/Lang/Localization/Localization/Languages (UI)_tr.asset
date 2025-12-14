@@ -553,6 +553,18 @@ MonoBehaviour:
     m_Localized: "Sohbet Ge\xE7mi\u015Fini Sil"
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: "Hata Ay\u0131klama (Debugging)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: "Varsay\u0131lan\u0131 Kullan"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: "Linux'e \xD6zg\xFC Ayarlar"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

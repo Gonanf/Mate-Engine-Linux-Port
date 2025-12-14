@@ -43,7 +43,8 @@ public class SaveLoadHandler : MonoBehaviour
             if (args[i].Equals("--datadir", StringComparison.Ordinal) && i + 1 < args.Length)
                 customDataDir = args[i + 1].Trim('"');
 
-            safeMode = args[i].Equals("--safemode");
+            if (args[i].Equals("--safemode"))
+                safeMode = true;
         }
 
         LoadFromDisk();

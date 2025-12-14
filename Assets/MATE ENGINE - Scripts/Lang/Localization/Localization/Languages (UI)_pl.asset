@@ -553,6 +553,18 @@ MonoBehaviour:
     m_Localized: "Usu\u0144 histori\u0119 czatu"
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: Debugowanie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: "U\u017Cyj domy\u015Blnego"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: Ustawienia specyficzne dla Linux
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

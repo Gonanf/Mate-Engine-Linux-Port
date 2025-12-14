@@ -3,12 +3,13 @@ using System.IO;
 using LLMUnity;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 [DefaultExecutionOrder(-1000)]
 public class AISystemPromptBinder : MonoBehaviour
 {
     [Header("References")]
-    public InputField input;
+    public TMP_InputField input;
     public LLMCharacter target;
 
     [Header("Behavior")]
@@ -16,13 +17,13 @@ public class AISystemPromptBinder : MonoBehaviour
 
     void Reset()
     {
-        if (!input) input = GetComponent<InputField>();
+        if (!input) input = GetComponent<TMP_InputField>();
         if (!target) target = FindFirstObjectByType<LLMCharacter>();
     }
 
     void Awake()
     {
-        if (!input) input = GetComponent<InputField>();
+        if (!input) input = GetComponent<TMP_InputField>();
 
         string path = GetFixedPromptPath();
         string txt = target ? target.prompt : "";

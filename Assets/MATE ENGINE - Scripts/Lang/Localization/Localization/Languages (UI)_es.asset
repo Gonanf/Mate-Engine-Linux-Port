@@ -540,6 +540,18 @@ MonoBehaviour:
     m_Localized: Eliminar historial de chat
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: "Depuraci\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: Usar predeterminado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: "Configuraciones espec\xEDficas de Linux"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

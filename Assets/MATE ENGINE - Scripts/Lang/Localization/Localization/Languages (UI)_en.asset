@@ -536,6 +536,18 @@ MonoBehaviour:
     m_Localized: Del. CHAT HISTORY
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: Debugging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: Use Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: Linux-Specific Settings
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

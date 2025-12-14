@@ -588,6 +588,18 @@ MonoBehaviour:
     m_Localized: Supprimer l'Historique de Discussion
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: "D\xE9bogage (debug)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: "Utiliser par d\xE9faut"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: "Param\xE8tres sp\xE9cifiques \xE0 Linux"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

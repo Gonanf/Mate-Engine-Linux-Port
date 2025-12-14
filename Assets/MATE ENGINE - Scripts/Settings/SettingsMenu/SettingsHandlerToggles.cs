@@ -21,9 +21,7 @@ public class SettingsHandlerToggles : MonoBehaviour
     public Toggle enableDanceSwitchToggle;
     public Toggle enableRandomMessagesToggle;
     public Toggle enableHusbandoModeToggle;
-    public Toggle useXMoveWindowToggle;
     public Toggle verboseDiscordRpcLogToggle;
-    public Toggle enableAutoMemoryTrimToggle;
 
     [Header("External Objects")]
     public GameObject bloomObject;
@@ -48,10 +46,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         enableDanceSwitchToggle?.onValueChanged.AddListener(OnEnableDanceSwitchChanged);
         enableRandomMessagesToggle?.onValueChanged.AddListener(OnEnableRandomMessagesChanged);
         enableHusbandoModeToggle?.onValueChanged.AddListener(OnEnableHusbandoModeChanged);
-        useXMoveWindowToggle?.onValueChanged.AddListener(OnUseXMoveWindowToggleChanged);
         verboseDiscordRpcLogToggle?.onValueChanged.AddListener(OnVerboseDiscordRpcLogChanged);
-        enableAutoMemoryTrimToggle?.onValueChanged.AddListener(OnEnableAutoMemoryTrimChanged);
-
+        
         LoadSettings();
         ApplySettings();
     }
@@ -78,12 +74,8 @@ public class SettingsHandlerToggles : MonoBehaviour
     }
     private void OnEnableHusbandoModeChanged(bool v) { SaveLoadHandler.Instance.data.enableHusbandoMode = v; Save(); }
     
-    private void OnUseXMoveWindowToggleChanged(bool v) { SaveLoadHandler.Instance.data.useXMoveWindow = v; Save(); }
-    
     private void OnVerboseDiscordRpcLogChanged(bool v) { SaveLoadHandler.Instance.data.verboseDiscordRPCLog = v; DiscordPresence.Instance.client.Logger = v ? new UnityLogger { Level = LogLevel.Trace } : new NullLogger(); Save(); }
     
-    private void OnEnableAutoMemoryTrimChanged(bool v) { SaveLoadHandler.Instance.data.enableAutoMemoryTrim = v; ApplySettings(); Save(); }
-
     #endregion
 
     private void LoadSettings()
@@ -102,10 +94,8 @@ public class SettingsHandlerToggles : MonoBehaviour
         enableIKToggle?.SetIsOnWithoutNotify(data.enableIK);
         enableDanceSwitchToggle?.SetIsOnWithoutNotify(data.enableDanceSwitch);
         enableHusbandoModeToggle?.SetIsOnWithoutNotify(data.enableHusbandoMode);
-        useXMoveWindowToggle?.SetIsOnWithoutNotify(data.useXMoveWindow);
         enableRandomMessagesToggle?.SetIsOnWithoutNotify(data.enableRandomMessages);
         verboseDiscordRpcLogToggle?.SetIsOnWithoutNotify(data.verboseDiscordRPCLog);
-        enableAutoMemoryTrimToggle?.SetIsOnWithoutNotify(data.enableAutoMemoryTrim);
         ApplySettings();
     }
 
@@ -168,9 +158,7 @@ public class SettingsHandlerToggles : MonoBehaviour
         enableDanceSwitchToggle?.SetIsOnWithoutNotify(false);
         enableRandomMessagesToggle?.SetIsOnWithoutNotify(false);
         enableHusbandoModeToggle?.SetIsOnWithoutNotify(false);
-        useXMoveWindowToggle?.SetIsOnWithoutNotify(false);
         verboseDiscordRpcLogToggle?.SetIsOnWithoutNotify(false);
-        enableAutoMemoryTrimToggle?.SetIsOnWithoutNotify(false);
 
         var data = SaveLoadHandler.Instance.data;
         data.enableDancing = true;

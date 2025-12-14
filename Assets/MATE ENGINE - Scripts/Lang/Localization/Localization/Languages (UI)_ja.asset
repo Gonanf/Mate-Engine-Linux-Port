@@ -531,6 +531,18 @@ MonoBehaviour:
     m_Localized: "\u30C1\u30E3\u30C3\u30C8\u5C65\u6B74\u3092\u524A\u9664"
     m_Metadata:
       m_Items: []
+  - m_Id: 90363322544807936
+    m_Localized: "\u30C7\u30D0\u30C3\u30B0"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90370867460169728
+    m_Localized: "\u30C7\u30D5\u30A9\u30EB\u30C8\u3092\u4F7F\u7528"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82501053278445568
+    m_Localized: "Linux \u56FA\u6709\u306E\u8A2D\u5B9A"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

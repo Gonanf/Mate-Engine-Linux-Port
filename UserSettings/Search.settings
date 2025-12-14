@@ -85,6 +85,8 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"font as"
+	"st: debug"
 	"package"
 	"manage"
 	"manage n"
@@ -100,11 +102,9 @@ recentSearches = [
 	"st: ambi_^1"
 	"st: alarm"
 	"st: scree"
-	"st: debug"
 	"st: ambie"
 	"st: screen"
 	"st: spine"
-	"st: language"
 ]
 searchItemFavorites = [
 ]

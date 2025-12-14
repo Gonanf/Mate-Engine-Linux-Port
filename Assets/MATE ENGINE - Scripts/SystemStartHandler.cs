@@ -2,14 +2,12 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using Debug = UnityEngine.Debug;
 
 public class SystemStartHandler : MonoBehaviour
 {
     [Header("UI (Optional)")]
     public Toggle autoStartToggle;
-    public TMP_Text checkmarkText;
 
     [Header("Settings")]
     public string runKeyName = "MateEngine";
@@ -47,7 +45,6 @@ public class SystemStartHandler : MonoBehaviour
         SaveLoadHandler.Instance.SaveToDisk();
 
         AddStartupEntry(isOn);
-        UpdateCheckmarkText(isOn);
     }
 
     public void OnCheckmarkClicked()
@@ -81,20 +78,13 @@ public class SystemStartHandler : MonoBehaviour
         {
             if (autoStartToggle)
                 autoStartToggle.SetIsOnWithoutNotify(isOn);
-            UpdateCheckmarkText(isOn);
         }
         finally
         {
             _isApplyingUI = false;
         }
     }
-
-    private void UpdateCheckmarkText(bool isOn)
-    {
-        if (checkmarkText)
-            checkmarkText.text = isOn ? "☑ Start with X11" : "☐ Start with X11";
-    }
-
+    
     private void AddStartupEntry(bool enable)
     {
         if (Application.platform != RuntimePlatform.LinuxPlayer &&

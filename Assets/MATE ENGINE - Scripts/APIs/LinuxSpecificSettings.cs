@@ -1,12 +1,13 @@
 using Gtk;
-using System;
-using UnityEditor;
 using UnityEngine;
+using X11;
 using Application = Gtk.Application;
 
 public class LinuxSpecificSettings : MonoBehaviour
 {
     private Window window;
+
+    public GameObject background;
     
     public Texture2D icon;
     
@@ -14,10 +15,13 @@ public class LinuxSpecificSettings : MonoBehaviour
     private bool enableAutoMemoryTrim;
 
     private Rect windowRect;
-    private bool showWindow = true;
+    private bool showWindow;
+
+    private bool inEditor;
     public void Start()
     {
         #if UNITY_EDITOR
+        inEditor = true;
         return;
         #endif
         window = new Window(UnityEngine.Application.productName)
@@ -29,38 +33,41 @@ public class LinuxSpecificSettings : MonoBehaviour
         window.Destroyed += (s, e) =>
         {
             ShowWindow(false);
-            Application.Quit();
         };
         
         SetupGtkWindow(window);
-        
-        ShowWindow();
     }
 
     public void ShowWindow(bool show = true)
     {
         showWindow = show;
-#if UNITY_EDITOR
-        return;
-#endif
+        if (inEditor || SaveLoadHandler.Instance.safeMode)
+        {
+            background.SetActive(true);
+            if (!show)
+            {
+                background.SetActive(false);
+            }
+            return;
+        }
         if (show)
         {
+            X11Manager.Instance.SetTopmost(false);
             window.ShowAll();
             Application.Run();
             return;
         }
+        X11Manager.Instance.SetTopmost(SaveLoadHandler.Instance.data.isTopmost);
         window.Hide();
+        Application.Quit();
     }
 
     void SetupGtkWindow(Window window)
     {
         var mainBox = new Box(Orientation.Horizontal, 0);
         window.Add(mainBox);
-        
-        var iconBox = new Box(Orientation.Vertical, 0)
-        {
-            MarginStart = 20
-        };
+
+        var iconBox = new Box(Orientation.Vertical, 0);
         mainBox.PackStart(iconBox, false, false, 0);
 
         var image = new Image(new Gdk.Pixbuf(icon.EncodeToPNG()));
@@ -68,8 +75,7 @@ public class LinuxSpecificSettings : MonoBehaviour
         
         var contentBox = new Box(Orientation.Vertical, 28)
         {
-            MarginStart = 20,
-            MarginEnd = 20
+            MarginEnd = 50
         };
         mainBox.PackStart(contentBox, true, true, 0);
         
@@ -97,7 +103,7 @@ public class LinuxSpecificSettings : MonoBehaviour
         ((Label)check1.Child).SetAlignment(0.0f, 0.5f);
         cardBox.PackStart(check1, false, false, 0);
 
-        var desc1 = CreateDescriptionLabel("XMoveWindow bypasses WM and updates the window’s origin directly, which can leave window decorations out of sync. _NET_MOVERESIZE_WINDOW protocol sends a message to ask WM to move MateEngine window as a complete, decorated unit on every modern Linux desktop while respecting the user’s compositor animations and tiling rules.\nOnly use XMoveWindow in case that you cannot drag and move your avatar at all.");
+        var desc1 = CreateDescriptionLabel("XMoveWindow bypasses WM and updates the window’s origin directly, which can leave window decorations out of sync. _NET_MOVERESIZE_WINDOW protocol sends a message to ask WM to move MateEngine window as a complete, decorated unit on every modern Linux desktop while respecting the user’s compositor animations and tiling rules.\n\nOnly use XMoveWindow in case that you cannot drag and move your avatar at all.");
         desc1.UseUnderline = false;
         cardBox.PackStart(desc1, false, false, 0);
         
@@ -112,7 +118,7 @@ public class LinuxSpecificSettings : MonoBehaviour
         contentBox.PackEnd(buttonBox, false, false, 0);
 
         var backBtn = new Button("Cancel");
-        var continueBtn = new Button("OK");
+        var continueBtn = new Button("Save");
         continueBtn.StyleContext.AddClass("suggested-action");
 
         backBtn.Clicked += (s, e) =>
@@ -124,6 +130,7 @@ public class LinuxSpecificSettings : MonoBehaviour
             ShowWindow(false);
             SaveLoadHandler.Instance.data.useXMoveWindow = check1.Active;
             SaveLoadHandler.Instance.data.enableAutoMemoryTrim = check2.Active;
+            FindFirstObjectByType<SettingsHandlerToggles>().ApplySettings();
             SaveLoadHandler.Instance.SaveToDisk();
         };
 
@@ -166,7 +173,15 @@ public class LinuxSpecificSettings : MonoBehaviour
     
     private void OnGUI()
     {
-        if (!showWindow || SaveLoadHandler.Instance) if (!SaveLoadHandler.Instance.safeMode) return;
+        if (SaveLoadHandler.Instance.safeMode || inEditor)
+        {
+            if (!showWindow)
+                return;
+        }
+        else
+        {
+            return;
+        }
         
         if (windowRect.width == 0) // windowRect defaults to (0,0,0,0) initially
         {
@@ -223,6 +238,7 @@ public class LinuxSpecificSettings : MonoBehaviour
         {
             SaveLoadHandler.Instance.data.useXMoveWindow = useXMoveWindow;
             SaveLoadHandler.Instance.data.enableAutoMemoryTrim = enableAutoMemoryTrim;
+            FindFirstObjectByType<SettingsHandlerToggles>().ApplySettings();
             SaveLoadHandler.Instance.SaveToDisk();
             ShowWindow(false);
         }
