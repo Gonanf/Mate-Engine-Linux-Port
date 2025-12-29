@@ -4,6 +4,17 @@ using System.Diagnostics;
 
 public class WaylandUtility
 {
+    public static Vector2 GetMousePositionHyprland(){
+        string output = RunCommand("/usr/bin/hyprctl cursorpos");
+        string[] cursor = output.Trim().Split(',');
+        return new Vector2(float.Parse(cursor[0]),float.Parse(cursor[1]));
+    }
+
+    public static Vector2 SetWindowPositionHyprland(Vector2 position){
+        RunCommand($"/usr/bin/hyprctl dispatch movewindowpixel exact {(position.x - (Screen.width/2))} {(position.y - (Screen.height/2))},title:MateEngineX"); //! When testing, the title is Game, in deploy is MateEngineX
+        return position;
+    }
+
     public Vector2 GetWindowPositionKWin()
     {
         string output = RunCommand(Application.streamingAssetsPath + "/kdotool search --name 'MateEngineX' getwindowgeometry");
@@ -18,7 +29,7 @@ public class WaylandUtility
         return Vector2.zero;
     }
 
-    string RunCommand(string command)
+    static string RunCommand(string command)
     {
         ProcessStartInfo psi = new ProcessStartInfo()
         {
