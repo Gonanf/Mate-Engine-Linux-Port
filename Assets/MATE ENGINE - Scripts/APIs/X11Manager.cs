@@ -17,7 +17,7 @@ namespace X11
     public class X11Manager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         public static X11Manager Instance;
-        bool is_hyprland = true;
+        bool is_hyprland;
 
         private Vector2 initialMousePos;
         private Vector2 initialWindowPos;
@@ -43,7 +43,7 @@ namespace X11
         private void OnEnable()
         {
             Instance = this;
-            // is_hyprland = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") == "Hyprland";
+             is_hyprland = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") == "Hyprland";
         }
 
         private Vector2 lastPos;
