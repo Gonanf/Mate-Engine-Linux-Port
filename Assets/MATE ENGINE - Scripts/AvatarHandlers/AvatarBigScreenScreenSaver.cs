@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
-using X11;
 
 public class AvatarBigScreenScreenSaver : MonoBehaviour
 {
@@ -181,7 +180,7 @@ public class AvatarBigScreenScreenSaver : MonoBehaviour
 
     Vector2 GetGlobalMousePosition()
     {
-        Vector2 point = X11Manager.Instance.GetMousePosition();
+        Vector2 point = WindowGeometries.Instance.GetMousePosition();
         return new Vector2(point.x, point.y);
     }
 

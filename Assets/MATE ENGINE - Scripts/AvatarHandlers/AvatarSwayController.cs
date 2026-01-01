@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using X11;
 
 public class AvatarSwayController : MonoBehaviour
 {
@@ -66,18 +64,16 @@ public class AvatarSwayController : MonoBehaviour
     Vector2 filteredDelta;
     Vector2 prevMousePos;
     
-    IntPtr hwnd;
     Vector2 prevWinPos;
 
-    void Start()
+    async void Start()
     {
         draggingHash = Animator.StringToHash(draggingParam);
-        prevMousePos = X11Manager.Instance.GetMousePosition();
-        hwnd = X11Manager.Instance.UnityWindow;
-        if (hwnd != IntPtr.Zero) prevWinPos = X11Manager.Instance.GetWindowPosition();
+        prevMousePos = WindowGeometries.Instance.GetMousePosition();
+        prevWinPos = await WindowGeometries.Instance.GetWindowPosition();
     }
 
-    void Update()
+    async void Update()
     {
         EnsureAnimatorAndBones();
         if (!anim || !hips) return;
@@ -89,9 +85,9 @@ public class AvatarSwayController : MonoBehaviour
         float dt = Time.deltaTime;
         Vector2 delta = Vector2.zero;
         
-        if (useWindowVelocity && hwnd != IntPtr.Zero)
+        if (useWindowVelocity)
         {
-            Vector2 wp = X11Manager.Instance.GetWindowPosition();
+            Vector2 wp = await WindowGeometries.Instance.GetWindowPosition();
             Vector2 d = wp - prevWinPos;
             prevWinPos = wp;
             delta = new Vector2(d.x, d.y);
@@ -99,14 +95,14 @@ public class AvatarSwayController : MonoBehaviour
         
         if (delta == Vector2.zero && fallbackToMouse && dragging)
         {
-            Vector2 m = X11Manager.Instance.GetMousePosition();
+            Vector2 m = WindowGeometries.Instance.GetMousePosition();
             Vector2 md = (m - prevMousePos) * mouseSensitivity;
             prevMousePos = m;
             delta = md;
         }
         else
         {
-            prevMousePos = X11Manager.Instance.GetMousePosition();
+            prevMousePos = WindowGeometries.Instance.GetMousePosition();
         }
 
         filteredDelta = Vector2.Lerp(filteredDelta, delta, 1f - Mathf.Exp(-12f * dt));

@@ -4,7 +4,6 @@ using System.Reflection;
 using UnityEngine;
 using UniVRM10;
 using VRM;
-using X11;
 
 public class AvatarBigScreenTouchHandler : MonoBehaviour
 {
@@ -108,7 +107,7 @@ public class AvatarBigScreenTouchHandler : MonoBehaviour
         }
 
         // ColliderObjekt an Mausposition setzen (auf 3D-Position in Avatarn�he)
-        Vector3 mouse = X11Manager.Instance.GetMousePosition();
+        Vector3 mouse = WindowGeometries.Instance.GetMousePosition();
         float zDist = 1.0f;
         if (bigScreenHandler.attachBone != HumanBodyBones.LastBone)
         {

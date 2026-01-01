@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UniVRM10;
-using X11;
 
 [Serializable]
 public class TrackingPermission
@@ -112,7 +111,7 @@ public class AvatarMouseTracking : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+    async void LateUpdate()
     {
         if (!enableMouseTracking || !mainCam || !animator) return;
         var info = animator.GetCurrentAnimatorStateInfo(0);
@@ -120,8 +119,8 @@ public class AvatarMouseTracking : MonoBehaviour
         bool trans = animator.IsInTransition(0);
         if (trans) nextStateHash = next.shortNameHash;
         else { currStateHash = info.shortNameHash; nextStateHash = 0; }
-        var oriMouse = X11Manager.Instance.GetMousePosition();
-        var winPos = X11Manager.Instance.GetWindowPosition();
+        var oriMouse = WindowGeometries.Instance.GetMousePosition();
+        var winPos = await WindowGeometries.Instance.GetWindowPosition();
         mouseExact = new Vector2(oriMouse.x - winPos.x, Screen.height - oriMouse.y + winPos.y);
 
         if (IsAllowed("Head")) DoHead();
@@ -164,7 +163,7 @@ public class AvatarMouseTracking : MonoBehaviour
         if (!spineBone || !spineDriver) return;
         float targetW = IsAllowed("Spine") ? 1f : 0f;
         spineTrackingWeight = Mathf.MoveTowards(spineTrackingWeight, targetW, Time.deltaTime * spineFadeSpeed);
-        float normY = Mathf.Clamp01(X11Manager.Instance.GetMousePosition().x / Screen.width);
+        float normY = Mathf.Clamp01(WindowGeometries.Instance.GetMousePosition().x / Screen.width);
         float targetY = Mathf.Lerp(spineMinRotation, spineMaxRotation, normY);
         spineDriver.localRotation = Quaternion.Slerp(spineDriver.localRotation, Quaternion.Euler(0f, -targetY, 0f), Time.deltaTime * spineSmoothness);
         var baseRot = spineBone.localRotation;
