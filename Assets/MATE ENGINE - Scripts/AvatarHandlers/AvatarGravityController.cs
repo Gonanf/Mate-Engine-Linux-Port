@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UniVRM10;
 using VRM;
+using X11;
 
 public class AvatarGravityController : MonoBehaviour
 {
@@ -21,9 +21,9 @@ public class AvatarGravityController : MonoBehaviour
     private List<VRM10SpringBoneJoint> springBoneJoints = new();
     private Vrm10Instance vrm10Instance;
 
-    async void Start()
+    void Start()
     {
-        previousWindowPos = await GetWindowPosition();
+        previousWindowPos = GetWindowPosition();
 
         // VRM0 spring bones
         springBones.AddRange(GetComponentsInChildren<VRMSpringBone>(true));
@@ -35,9 +35,9 @@ public class AvatarGravityController : MonoBehaviour
         vrm10Instance = GetComponentInParent<Vrm10Instance>();
     }
 
-    async void Update()
+    void Update()
     {
-        Vector2Int currentWindowPos = await GetWindowPosition();
+        Vector2Int currentWindowPos = GetWindowPosition();
         Vector2Int delta = currentWindowPos - previousWindowPos;
 
         if (delta != Vector2Int.zero)
@@ -85,9 +85,9 @@ public class AvatarGravityController : MonoBehaviour
 
     #region Linux API
 
-    private async Task<Vector2Int> GetWindowPosition()
+    private Vector2Int GetWindowPosition()
     {
-        Vector2 vect = await WindowGeometries.Instance.GetWindowPosition();
+        Vector2 vect = X11Manager.Instance.GetWindowPosition();
         return new Vector2Int((int)vect.x, (int)vect.y);
     }
 

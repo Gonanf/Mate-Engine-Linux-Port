@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
+using X11;
 
 [RequireComponent(typeof(Animator))]
 public class HandHolder : MonoBehaviour
@@ -52,7 +52,7 @@ public class HandHolder : MonoBehaviour
         CacheTransforms();
     }
 
-    async void Update()
+    void Update()
     {
         if (!enableHandHolding || !IsValid())
         {
@@ -75,8 +75,8 @@ public class HandHolder : MonoBehaviour
             return;
         }
 
-        float leftWeight = await ComputeWorldWeight(leftHand);
-        float rightWeight = await ComputeWorldWeight(rightHand);
+        float leftWeight = ComputeWorldWeight(leftHand);
+        float rightWeight = ComputeWorldWeight(rightHand);
 
         if (leftWeight > rightWeight)
         {
@@ -94,16 +94,16 @@ public class HandHolder : MonoBehaviour
         leftIKWeight = Mathf.MoveTowards(leftIKWeight, leftWeight, Time.deltaTime / (leftWeight > leftIKWeight ? blendInTime : blendOutTime));
         rightIKWeight = Mathf.MoveTowards(rightIKWeight, rightWeight, Time.deltaTime / (rightWeight > rightIKWeight ? blendInTime : blendOutTime));
 
-        Vector3 target = await GetProjectedMouseTarget();
+        Vector3 target = GetProjectedMouseTarget();
         if (leftIsActive) leftTargetPos = Vector3.Lerp(leftTargetPos, target, Time.deltaTime * followSpeed);
         if (rightIsActive) rightTargetPos = Vector3.Lerp(rightTargetPos, target, Time.deltaTime * followSpeed);
     }
-    
-    async Task<float> ComputeWorldWeight(Transform hand)
+
+    float ComputeWorldWeight(Transform hand)
     {
         if (!hand) return 0f;
-        var oriMouse = WindowGeometries.Instance.GetMousePosition();
-        var winPos = await WindowGeometries.Instance.GetWindowPosition();
+        var oriMouse = X11Manager.Instance.GetMousePosition();
+        var winPos = X11Manager.Instance.GetWindowPosition();
         var mouseScreen = new Vector3(oriMouse.x - winPos.x, Screen.height - oriMouse.y + winPos.y);
         mouseScreen.z = mainCam.WorldToScreenPoint(hand.position).z;
         Vector3 mouseWorld = mainCam.ScreenToWorldPoint(mouseScreen);
@@ -177,10 +177,10 @@ public class HandHolder : MonoBehaviour
             + avatarAnimator.transform.up * elbowHintHeightOffset;
     }
 
-    async Task<Vector3> GetProjectedMouseTarget()
+    Vector3 GetProjectedMouseTarget()
     {
-        var oriMouse = WindowGeometries.Instance.GetMousePosition();
-        var winPos = await WindowGeometries.Instance.GetWindowPosition();
+        var oriMouse = X11Manager.Instance.GetMousePosition();
+        var winPos = X11Manager.Instance.GetWindowPosition();
         var mouse = new Vector3(oriMouse.x - winPos.x, Screen.height - oriMouse.y + winPos.y);
         mouse.z = mainCam.WorldToScreenPoint(chest.position).z;
         Vector3 world = mainCam.ScreenToWorldPoint(mouse);

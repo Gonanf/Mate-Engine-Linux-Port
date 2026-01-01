@@ -17,9 +17,14 @@ using UnityEngine.SceneManagement;
 
 namespace X11
 {
-    public class X11Manager : MonoBehaviour
+    public class X11Manager : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         public static X11Manager Instance;
+        bool is_hyprland;
+
+        private Vector2 initialMousePos;
+        private Vector2 initialWindowPos;
+        public bool isDragging;
 
         public IntPtr Display
         {
@@ -41,6 +46,29 @@ namespace X11
         private void OnEnable()
         {
             Instance = this;
+             is_hyprland = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") == "Hyprland";
+        }
+
+        private Vector2 lastPos;
+
+        void Update()
+        {
+            if (isDragging)
+            {
+                if (is_hyprland){
+                    var current = WaylandUtility.GetMousePositionHyprland();
+                    if (current == lastPos) return;
+                    SetWindowPosition(current);
+                    lastPos = current;
+                    return;
+                }
+                var currentMousePos = GetMousePosition();
+                var delta = currentMousePos - initialMousePos;
+                var newPos = initialWindowPos + delta;
+                if (newPos == lastPos) return;
+                SetWindowPosition(newPos);
+                lastPos = newPos;
+            }
         }
 
         private void Awake()
@@ -65,8 +93,20 @@ namespace X11
 
             EnableClickThroughTransparency();
         }
-        
+
         private void OnApplicationQuit() => StartCoroutine(Dispose());
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            initialMousePos = GetMousePosition();
+            initialWindowPos = GetWindowPosition();
+            isDragging = true;
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            isDragging = false;
+        }
 
         private void Init()
         {
@@ -145,6 +185,10 @@ namespace X11
                 }
             if (_display != IntPtr.Zero && _unityWindow != IntPtr.Zero)
             {
+                if (is_hyprland){
+                WaylandUtility.SetWindowPositionHyprland(position);
+                return;
+                }
                 var atom = XInternAtom(_display, "_NET_MOVERESIZE_WINDOW", true);
                 if (atom == IntPtr.Zero)
                 {
@@ -547,7 +591,7 @@ namespace X11
         }
 
 
-        public void SetWindowBorderless()
+        private void SetWindowBorderless()
         {
             if (_display == IntPtr.Zero || _unityWindow == IntPtr.Zero) return;
 
@@ -838,33 +882,34 @@ namespace X11
 
         private void UpdateInputMask(int width, int height)
         {
-            var xImagePtr = XGetImage(_display, _unityWindow, 0, 0, (uint)width, (uint)height, AllPlanes, ZPixmap);
-            if (xImagePtr == IntPtr.Zero) return;
+            unsafe
+            {
+                if (isDragging || !running)
+                    return;
+            
+                if (_shapingStopwatch.IsRunning && _shapingStopwatch.ElapsedMilliseconds < ShapingThrottleMs)
+                    return;
 
-            var xImage = Marshal.PtrToStructure<XImage_Internal>(xImagePtr);
-            int totalPixels = width * height;
+                _shapingStopwatch.Restart();
 
-            unsafe {
-                var rawPixels = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<uint>(
-                    (void*)xImage.data, totalPixels, Allocator.None);
-                
-                var alphaMap = new NativeArray<byte>(totalPixels, Allocator.Persistent);
-
-                try {
-                    var job = new ProcessPixelsJob { RawPixels = rawPixels, AlphaMap = alphaMap };
-                    // Ensure the job completes before we move on
-                    job.Schedule(totalPixels, 64).Complete();
-
-                    var mask = CreateShapeMaskFromNative(width, height, alphaMap);
-                    XShapeCombineMask(_display, _unityWindow, ShapeInput, 0, 0, mask, ShapeSet);
-
-                    XFreePixmap(_display, mask);
-                }
-                finally {
-                    // This ensures disposal even if X11 calls throw an exception
-                    if (alphaMap.IsCreated) alphaMap.Dispose();
-                    XDestroyImage(xImagePtr);
-                }
+                var xImagePtr = XGetImage(_display, _unityWindow, 0, 0, (uint)width, (uint)height, AllPlanes, ZPixmap);
+                if (xImagePtr == IntPtr.Zero) return;
+            
+                var xImage = Marshal.PtrToStructure<XImage_Internal>(xImagePtr);
+                int totalPixels = width * height;
+            
+                var rawPixels = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<uint>((void*)xImage.data, totalPixels, Allocator.None);
+                var alphaMap = new NativeArray<byte>(totalPixels, Allocator.TempJob);
+            
+                var job = new ProcessPixelsJob { RawPixels = rawPixels, AlphaMap = alphaMap };
+                job.Schedule(totalPixels, 64).Complete();
+            
+                var mask = CreateShapeMaskFromNative(width, height, alphaMap);
+                XShapeCombineMask(_display, _unityWindow, ShapeInput, 0, 0, mask, ShapeSet);
+            
+                XFreePixmap(_display, mask);
+                XDestroyImage(xImagePtr);
+                alphaMap.Dispose();
             }
         }
 
